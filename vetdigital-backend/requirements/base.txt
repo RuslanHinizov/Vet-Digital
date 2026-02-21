@@ -1,0 +1,58 @@
+# Core
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
+pydantic-settings==2.7.0
+
+# Database
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+psycopg2-binary==2.9.10
+
+# Redis & Celery
+redis==5.2.1
+celery==5.4.0
+celery[redis]==5.4.0
+
+# Security
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+cryptography==44.0.0
+
+# HTTP Client
+httpx==0.28.1
+aiohttp==3.11.10
+
+# MQTT (IoT)
+aiomqtt==2.3.0
+
+# File Storage (MinIO / S3)
+boto3==1.35.93
+
+# PDF Generation
+reportlab==4.2.5
+weasyprint==63.0
+
+# Excel Parsing
+openpyxl==3.1.5
+
+# Geospatial
+shapely==2.0.6
+geoalchemy2==0.16.0
+
+# WebSocket
+websockets==14.1
+
+# Push Notifications
+firebase-admin==6.6.0
+
+# Utilities
+python-multipart==0.0.20
+python-dateutil==2.9.0
+babel==2.16.0
+Pillow==10.4.0
+qrcode==8.0
+
+# Monitoring
+prometheus-client==0.21.1

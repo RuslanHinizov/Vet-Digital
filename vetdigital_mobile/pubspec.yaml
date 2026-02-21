@@ -1,0 +1,123 @@
+name: vetdigital_mobile
+description: VetDigital - Kazakhstan Veterinary Animal GPS/RFID Tracking System
+
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Routing
+  go_router: ^14.2.7
+
+  # Data Models (immutable)
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # HTTP Client
+  dio: ^5.4.3+1
+
+  # Local Database (Offline)
+  drift: ^2.18.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # Secure Storage (tokens)
+  flutter_secure_storage: ^9.2.2
+
+  # Shared Preferences
+  shared_preferences: ^2.3.2
+
+  # Map (OpenStreetMap - free, works offline)
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
+  # Bluetooth RFID Reader
+  flutter_blue_plus: ^1.32.12
+
+  # WebSocket (live GPS)
+  web_socket_channel: ^3.0.1
+
+  # Network Connectivity
+  connectivity_plus: ^6.0.5
+
+  # Internationalization
+  intl: ^0.19.0
+
+  # PDF Generation & Viewing
+  pdf: ^3.11.0
+  printing: ^5.13.1
+
+  # Charts
+  fl_chart: ^0.68.0
+
+  # Image & Camera
+  image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+
+  # QR Code
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^5.2.3
+
+  # Push Notifications
+  firebase_core: ^3.5.0
+  firebase_messaging: ^15.1.2
+
+  # Permissions
+  permission_handler: ^11.3.1
+
+  # Device GPS
+  geolocator: ^13.0.1
+
+  # Icons
+  flutter_svg: ^2.0.10+1
+  font_awesome_flutter: ^10.7.0
+
+  # Charts
+  fl_chart: ^0.68.0
+
+  # Utils
+  uuid: ^4.5.1
+  intl_phone_field: ^3.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.4.12
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
+  drift_dev: ^2.18.0
+  riverpod_generator: ^2.4.3
+
+  # Linting
+  flutter_lints: ^4.0.0
+  mockito: ^5.4.4
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  # For flutter_map offline tiles
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700

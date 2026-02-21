@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+docker/data/
+
+# Firebase credentials
+firebase-credentials.json
+
+# Flutter
+vetdigital_mobile/.dart_tool/
+vetdigital_mobile/.packages
+vetdigital_mobile/build/
+vetdigital_mobile/.flutter-plugins
+vetdigital_mobile/.flutter-plugins-dependencies
+vetdigital_mobile/pubspec.lock
+vetdigital_mobile/android/.gradle/
+vetdigital_mobile/android/local.properties
+vetdigital_mobile/ios/Pods/
+vetdigital_mobile/ios/.symlinks/
+
+# Claude
+.claude/settings.local.json
+
+# Logs
+*.log
+
+# Test / Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Node (if any)
+node_modules/
