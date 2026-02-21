@@ -1,24 +1,22 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
+
+// Conditional imports for file caching (native only)
+import 'dart:io' if (dart.library.html) 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 /// Cache configuration constants
 const _kCacheMaxAgeDays = 30;
-const _kCacheMaxSizeMb = 512;
 
-/// Tile cache manager using local file system.
-///
-/// Tiles are stored at: {appCacheDir}/map_tiles/{z}/{x}/{y}.png
-/// Cache TTL: [_kCacheMaxAgeDays] days
+/// Tile cache manager using local file system (native only; no-op on web).
 class MapTileCache {
   static MapTileCache? _instance;
-  late final Directory _cacheDir;
+  String? _cacheDirPath;
   bool _initialized = false;
 
   MapTileCache._();
@@ -26,19 +24,24 @@ class MapTileCache {
 
   Future<void> init() async {
     if (_initialized) return;
-    final appCacheDir = await getApplicationCacheDirectory();
-    _cacheDir = Directory(p.join(appCacheDir.path, 'map_tiles'));
-    await _cacheDir.create(recursive: true);
+    if (kIsWeb) {
+      _initialized = true;
+      return;
+    }
+    try {
+      final appCacheDir = await getApplicationCacheDirectory();
+      _cacheDirPath = p.join(appCacheDir.path, 'map_tiles');
+      await Directory(_cacheDirPath!).create(recursive: true);
+    } catch (_) {
+      // Fallback: no file caching
+    }
     _initialized = true;
   }
 
-  File _tileFile(int z, int x, int y) {
-    return File(p.join(_cacheDir.path, '$z', '$x', '$y.png'));
-  }
-
   Future<File?> get(int z, int x, int y) async {
+    if (kIsWeb || _cacheDirPath == null) return null;
     await init();
-    final file = _tileFile(z, x, y);
+    final file = File(p.join(_cacheDirPath!, '$z', '$x', '$y.png'));
     if (!await file.exists()) return null;
 
     final stat = await file.stat();
@@ -51,17 +54,19 @@ class MapTileCache {
   }
 
   Future<void> put(int z, int x, int y, List<int> bytes) async {
+    if (kIsWeb || _cacheDirPath == null) return;
     await init();
-    final file = _tileFile(z, x, y);
+    final file = File(p.join(_cacheDirPath!, '$z', '$x', '$y.png'));
     await file.parent.create(recursive: true);
     await file.writeAsBytes(bytes);
   }
 
-  /// Estimate cache size in MB
   Future<double> cacheSize() async {
+    if (kIsWeb || _cacheDirPath == null) return 0;
     await init();
     int total = 0;
-    await for (final entity in _cacheDir.list(recursive: true)) {
+    final dir = Directory(_cacheDirPath!);
+    await for (final entity in dir.list(recursive: true)) {
       if (entity is File) {
         total += await entity.length();
       }
@@ -69,22 +74,18 @@ class MapTileCache {
     return total / (1024 * 1024);
   }
 
-  /// Delete all cached tiles
   Future<void> clear() async {
+    if (kIsWeb || _cacheDirPath == null) return;
     await init();
-    if (await _cacheDir.exists()) {
-      await _cacheDir.delete(recursive: true);
-      await _cacheDir.create(recursive: true);
+    final dir = Directory(_cacheDirPath!);
+    if (await dir.exists()) {
+      await dir.delete(recursive: true);
+      await dir.create(recursive: true);
     }
   }
 }
 
 /// Custom [TileProvider] for [FlutterMap] that caches OSM tiles locally.
-///
-/// Tile fetch flow:
-/// 1. Check local file cache
-/// 2. If miss (or expired), fetch from OSM tile server
-/// 3. Write to cache, return image bytes
 class CachedOsmTileProvider extends TileProvider {
   final MapTileCache _cache;
   final Dio _dio;
@@ -155,7 +156,7 @@ class _CachedTileImageProvider extends ImageProvider<_CachedTileImageProvider> {
     final x = coordinates.x;
     final y = coordinates.y;
 
-    // 1. Try cache
+    // 1. Try cache (native only)
     final cached = await cache.get(z, x, y);
     if (cached != null) {
       return cached.readAsBytes();
@@ -171,7 +172,6 @@ class _CachedTileImageProvider extends ImageProvider<_CachedTileImageProvider> {
       await cache.put(z, x, y, bytes);
       return bytes;
     } catch (e) {
-      // Return transparent 1×1 tile on failure
       return _transparentPng;
     }
   }

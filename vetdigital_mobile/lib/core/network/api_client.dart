@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
+import '../config/api_endpoints.dart';
+import '../storage/secure_storage.dart';
 
 /// Riverpod provider that exposes the shared Dio instance.
 final dioProvider = Provider<Dio>((ref) => ApiClient.instance.dio);
@@ -47,9 +49,8 @@ class ApiClient {
 class _AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    // Get token from secure storage
-    final token = await _getAccessToken();
-    if (token != null) {
+    final token = await SecureStorage.instance.getAccessToken();
+    if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
     handler.next(options);
@@ -58,12 +59,17 @@ class _AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      // Try token refresh
+      // Don't try to refresh if the failing request was the login or refresh endpoint
+      final path = err.requestOptions.path;
+      if (path.contains('/auth/login') || path.contains('/auth/refresh')) {
+        handler.next(err);
+        return;
+      }
+
       final refreshed = await _tryRefreshToken();
       if (refreshed) {
-        // Retry original request
         final opts = err.requestOptions;
-        final token = await _getAccessToken();
+        final token = await SecureStorage.instance.getAccessToken();
         opts.headers['Authorization'] = 'Bearer $token';
         try {
           final response = await ApiClient.instance.dio.fetch(opts);
@@ -71,24 +77,29 @@ class _AuthInterceptor extends Interceptor {
           return;
         } catch (_) {}
       }
-      // Refresh failed - trigger logout
-      _onAuthFailure();
     }
     handler.next(err);
   }
 
-  Future<String?> _getAccessToken() async {
-    // TODO: Read from flutter_secure_storage
-    // return await SecureStorage.instance.read('access_token');
-    return null;
-  }
-
   Future<bool> _tryRefreshToken() async {
-    // TODO: Call /api/v1/auth/refresh
-    return false;
-  }
+    final refreshToken = await SecureStorage.instance.getRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) return false;
 
-  void _onAuthFailure() {
-    // TODO: Navigate to login screen via GoRouter
+    try {
+      // Use a separate Dio instance to avoid interceptor loop
+      final dio = Dio(BaseOptions(baseUrl: AppConfig.baseUrl));
+      final response = await dio.post(
+        ApiEndpoints.refresh,
+        data: {'refresh_token': refreshToken},
+      );
+      final data = response.data as Map<String, dynamic>;
+      await SecureStorage.instance.saveTokens(
+        accessToken: data['access_token'],
+        refreshToken: data['refresh_token'],
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }
