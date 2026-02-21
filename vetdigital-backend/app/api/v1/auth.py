@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.schemas.auth import LoginRequest, TokenResponse, RefreshRequest, EDSLoginRequest
@@ -32,7 +33,7 @@ def _build_token_payload(user: User, role_name: str) -> dict:
 @router.post("/login", response_model=TokenResponse, summary="Login with IIN and password")
 async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
-        select(User).join(Role).where(User.iin == request.iin, User.is_active == True)
+        select(User).options(selectinload(User.role)).where(User.iin == request.iin, User.is_active == True)
     )
     user = result.scalar_one_or_none()
 
@@ -101,7 +102,7 @@ async def refresh_token(request: RefreshRequest, db: AsyncSession = Depends(get_
 
     user_id = payload.get("sub")
     result = await db.execute(
-        select(User).join(Role).where(User.id == user_id, User.is_active == True)
+        select(User).options(selectinload(User.role)).where(User.id == user_id, User.is_active == True)
     )
     user = result.scalar_one_or_none()
 

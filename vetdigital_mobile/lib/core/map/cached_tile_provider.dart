@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:path_provider/path_provider.dart';
@@ -134,9 +137,17 @@ class _CachedTileImageProvider extends ImageProvider<_CachedTileImageProvider> {
   ImageStreamCompleter loadImage(
       _CachedTileImageProvider key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadBytes().then(decode),
+      codec: _loadAndDecode(decode),
       scale: 1.0,
     );
+  }
+
+  Future<ui.Codec> _loadAndDecode(ImageDecoderCallback decode) async {
+    final bytes = await _loadBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(
+      Uint8List.fromList(bytes),
+    );
+    return decode(buffer);
   }
 
   Future<List<int>> _loadBytes() async {

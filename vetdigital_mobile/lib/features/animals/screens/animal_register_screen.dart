@@ -32,10 +32,9 @@ class _AnimalRegisterScreenState extends State<AnimalRegisterScreen> {
               ),
               const SizedBox(height: 12),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Номер микрочипа (15 цифр)', prefixIcon: Icon(Icons.nfc)),
+                decoration: const InputDecoration(labelText: 'Номер микрочипа (15 цифр)', prefixIcon: Icon(Icons.nfc), counterText: ''),
                 maxLength: 15,
                 keyboardType: TextInputType.number,
-                counterText: '',
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -94,7 +93,6 @@ class _AnimalRegisterScreenState extends State<AnimalRegisterScreen> {
                 ),
                 maxLength: 12,
                 keyboardType: TextInputType.number,
-                counterText: '',
                 validator: (v) => (v?.isEmpty ?? true) ? 'Обязательное поле' : null,
               ),
               const SizedBox(height: 24),

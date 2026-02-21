@@ -6,6 +6,13 @@
       "runtimeExecutable": "vetdigital-backend/venv/Scripts/uvicorn",
       "runtimeArgs": ["app.main:app", "--reload", "--port", "8000", "--app-dir", "vetdigital-backend"],
       "port": 8000
+    },
+    {
+      "name": "flutter-web",
+      "runtimeExecutable": "vetdigital-backend/venv/Scripts/python",
+      "runtimeArgs": ["-m", "http.server", "8080", "--directory", "vetdigital_mobile/build/web"],
+      "port": 8080,
+      "autoPort": false
     }
   ]
 }
